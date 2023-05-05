@@ -22,18 +22,10 @@ export async function main(ns) {
 	while (ns.getServerMoneyAvailable(target) < maxMoney || ns.getServerSecurityLevel(target) > ns.getServerMinSecurityLevel(target)) {
 		if (ns.getServerMoneyAvailable(target) < maxMoney) {
 			ns.run('grow.js', Math.min(Math.floor(maxRam * 0.7 / growRam), threadsForMaxMoney), target);
-			if (ns.getServerSecurityLevel(target) > ns.getServerMinSecurityLevel(target)) {
-				const maxSecRam = Math.floor((serv.maxRam - ns.getServerUsedRam(servName)) / weakenRam);
-				ns.run('weaken.js', maxSecRam, target);
-				await ns.sleep(ns.getWeakenTime(target) + 500);
-			} else {
-				await ns.sleep(ns.getGrowTime(target) + 500);
-			}
-		} else {
-			const maxSecRam = Math.floor((serv.maxRam - ns.getServerUsedRam(servName)) / weakenRam);
-			ns.run('weaken.js', maxSecRam, target);
-			await ns.sleep(ns.getWeakenTime(target) + 500);
-		}
+		} 
+		const maxSecRam = Math.floor((serv.maxRam - ns.getServerUsedRam(servName)) / weakenRam);
+		ns.run('weaken.js', maxSecRam, target);
+		await ns.sleep(ns.getWeakenTime(target) + 500);
 	}
 
 	// Growth calcs
@@ -58,8 +50,7 @@ export async function main(ns) {
 	const ramCost = (hackRam * hackThreads) + (growRam * growThreads) + (weakenRam * weakenThreads);
 	const cycles = Math.floor(maxRam / ramCost);
 	const cycleTime = Math.max(Math.ceil((ns.getWeakenTime(target)) / cycles) + 100, 400);
-	
-  ns.tprint(`
+	ns.tprint(`
 	# Grow Threads: ` + growThreads + `
 	# Hack Threads ` + hackThreads + `
 	# Weaken Threads ` + weakenThreads + `
@@ -68,10 +59,8 @@ export async function main(ns) {
 	Time between cycles: ` + cycleTime + ' ms');
 
 	// 10 Sec to run, 10 ram, 5 ram cost = 2 cycles per 5 sec
-  
 	let cycle = 0;
 	let loop = 0;
-  
 	while (true) {
 		if (ns.getServerSecurityLevel(target) === ns.getServerMinSecurityLevel(target)) {
 			const weakenTime = ns.getWeakenTime(target);
